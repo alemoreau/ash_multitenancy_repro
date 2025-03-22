@@ -52,7 +52,7 @@ config :my_app,
 
 # Configures the endpoint
 config :my_app, MyAppWeb.Endpoint,
-  url: [host: "localhost"],
+  url: [host: "repro.local"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: MyAppWeb.ErrorHTML, json: MyAppWeb.ErrorJSON],

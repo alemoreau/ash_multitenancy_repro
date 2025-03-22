@@ -11,18 +11,27 @@ defmodule MyApp.Accounts.User.Senders.SendNewUserConfirmationEmail do
   alias MyApp.Mailer
 
   @impl true
-  def send(user, token, _) do
+  def send(user, token, opts) do
+    tenant = opts[:tenant]
+
     new()
     # TODO: Replace with your email
     |> from({"noreply", "noreply@example.com"})
     |> to(to_string(user.email))
     |> subject("Confirm your email address")
-    |> html_body(body(token: token))
+    |> html_body(body(token: token, tenant: tenant))
     |> Mailer.deliver!()
   end
 
   defp body(params) do
-    url = url(~p"/auth/user/confirm_new_user?#{[confirm: params[:token]]}")
+    token = params[:token]
+    tenant = params[:tenant]
+
+    %{
+      host: host
+    } = uri = url(~p"/auth/user/confirm_new_user?#{[confirm: token]}") |> URI.parse()
+
+    url = %{uri | host: to_string(tenant.subdomain) <> "." <> host} |> to_string()
 
     """
     <p>Click this link to confirm your email:</p>

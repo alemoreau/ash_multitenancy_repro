@@ -39,6 +39,7 @@ defmodule MyApp.MixProject do
       {:ash_authentication, "~> 4.0"},
       {:ash_postgres, "~> 2.0"},
       {:ash_phoenix, "~> 2.0"},
+      {:ash_slug, "~> 0.2.1"},
       {:sourceror, "~> 1.7", only: [:dev, :test]},
       {:ash, "~> 3.0"},
       {:igniter, "~> 0.5", only: [:dev, :test]},

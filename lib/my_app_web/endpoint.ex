@@ -49,5 +49,10 @@ defmodule MyAppWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug MyAppWeb.Router
+
+  plug AshPhoenix.SubdomainPlug,
+    endpoint: MyAppWeb.Endpoint,
+    assign: :current_subdomain
+
+  plug MyAppWeb.Tenant.Plug
 end

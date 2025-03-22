@@ -23,38 +23,7 @@ defmodule MyAppWeb.Router do
 
   scope "/", MyAppWeb do
     pipe_through :browser
-
-    ash_authentication_live_session :authenticated_routes do
-      # in each liveview, add one of the following at the top of the module:
-      #
-      # If an authenticated user must be present:
-      # on_mount {MyAppWeb.LiveUserAuth, :live_user_required}
-      #
-      # If an authenticated user *may* be present:
-      # on_mount {MyAppWeb.LiveUserAuth, :live_user_optional}
-      #
-      # If an authenticated user must *not* be present:
-      # on_mount {MyAppWeb.LiveUserAuth, :live_no_user}
-    end
-  end
-
-  scope "/", MyAppWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-    auth_routes AuthController, MyApp.Accounts.User, path: "/auth"
-    sign_out_route AuthController
-
-    # Remove these if you'd like to use your own authentication views
-    sign_in_route register_path: "/register",
-                  reset_path: "/reset",
-                  auth_routes_prefix: "/auth",
-                  on_mount: [{MyAppWeb.LiveUserAuth, :live_no_user}],
-                  overrides: [MyAppWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
-
-    # Remove this if you do not want to use the reset password feature
-    reset_route auth_routes_prefix: "/auth",
-                overrides: [MyAppWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+    live "/", Live.Home
   end
 
   # Other scopes may use custom stacks.

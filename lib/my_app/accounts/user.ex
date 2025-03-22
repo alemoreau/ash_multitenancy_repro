@@ -3,7 +3,7 @@ defmodule MyApp.Accounts.User do
     otp_app: :my_app,
     domain: MyApp.Accounts,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication],
+    extensions: [AshJsonApi.Resource, AshAuthentication],
     data_layer: AshPostgres.DataLayer
 
   authentication do
@@ -33,6 +33,9 @@ defmodule MyApp.Accounts.User do
       password :password do
         identity_field :email
 
+        registration_enabled? true
+        sign_in_tokens_enabled? true
+
         resettable do
           sender MyApp.Accounts.User.Senders.SendPasswordResetEmail
           # these configurations will be the default in a future release
@@ -43,7 +46,7 @@ defmodule MyApp.Accounts.User do
 
       magic_link do
         identity_field :email
-        registration_enabled? true
+        registration_enabled? false
 
         sender MyApp.Accounts.User.Senders.SendMagicLinkEmail
       end
@@ -57,6 +60,13 @@ defmodule MyApp.Accounts.User do
 
   actions do
     defaults [:read]
+
+    create :create_admin do
+      description "Create a new user with the admin role."
+      accept [:email]
+
+      change set_attribute(:roles, [:admin])
+    end
 
     read :get_by_subject do
       description "Get a user by the subject claim in a JWT"
@@ -231,7 +241,7 @@ defmodule MyApp.Accounts.User do
       change AshAuthentication.GenerateTokenChange
     end
 
-    create :sign_in_with_magic_link do
+    read :sign_in_with_magic_link do
       description "Sign in or register a user with magic link."
 
       argument :token, :string do
@@ -239,12 +249,7 @@ defmodule MyApp.Accounts.User do
         allow_nil? false
       end
 
-      upsert? true
-      upsert_identity :unique_email
-      upsert_fields [:email]
-
-      # Uses the information from the token to create or sign in the user
-      change AshAuthentication.Strategy.MagicLink.SignInChange
+      prepare AshAuthentication.Strategy.MagicLink.SignInPreparation
 
       metadata :token, :string do
         allow_nil? false
@@ -265,9 +270,17 @@ defmodule MyApp.Accounts.User do
       authorize_if always()
     end
 
+    bypass MyApp.Accounts.Checks.InitialAccountCreation do
+      authorize_if always()
+    end
+
     policy always() do
       forbid_if always()
     end
+  end
+
+  multitenancy do
+    strategy :context
   end
 
   attributes do
@@ -280,6 +293,12 @@ defmodule MyApp.Accounts.User do
 
     attribute :hashed_password, :string do
       sensitive? true
+    end
+
+    attribute :roles, {:array, MyApp.Accounts.Role} do
+      default [:admin]
+      allow_nil? false
+      public? true
     end
   end
 

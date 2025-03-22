@@ -1,5 +1,12 @@
 # MyApp
 
+Add this to your `/etc/hosts` file:
+
+```
+127.0.0.1	repro.local
+127.0.0.1	demo.repro.local
+```
+
 To start your Phoenix server:
 
   * Run `mix setup` to install and setup dependencies
